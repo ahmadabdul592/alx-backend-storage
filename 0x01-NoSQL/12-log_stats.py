@@ -1,34 +1,22 @@
 #!/usr/bin/env python3
-"""
-Contains function that provides some stats about
-Nginx logs stored in MongoDB:
-"""
-from pymongo import MongoClient
-
-
-def log_stats(mongo_collection):
-    """
-    Prints some stats about Nginx logs stored in MongoDB
-
-    Args:
-        mongo_collection: MongoDB collection object
-    Returns:
-        Nothing
-    """
-    num_logs = mongo_collection.count_documents({})
-    print("{} logs".format(num_logs))
-    print("Methods:")
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    for method in methods:
-        docs = mongo_collection.count_documents({"method": method})
-        print("\tmethod {}: {}".format(method, docs))
-    route = mongo_collection.count_documents({"method": "GET",
-                                              "path": "/status"})
-    print("{} status check".format(route))
+""" Provides stats about Nginx logs restored in mongoDB"""
+import pymongo as pm
+db = pm.MongoClient()
+mydb = db["logs"]
+mycol = mydb["nginx"]
 
 
 if __name__ == "__main__":
-    with MongoClient() as client:
-        db = client.logs
-        collection = db.nginx
-        log_stats(collection)
+    get_get = mycol.count_documents({"method": "GET"})
+    get_post = mycol.count_documents({"method": "POST"})
+    get_put = mycol.count_documents({"method": "PUT"})
+    get_patch = mycol.count_documents({"method": "PATCH"})
+    get_delete = mycol.count_documents({"method": "DELETE"})
+    get_total = mycol.count_documents({})
+    get_status = mycol.count_documents({"method": "GET", "path": "/status"})
+
+
+    print("{} logs".format(get_total))
+    print("Methods:\n\tmethod GET: {}\n\tmethod POST: {}\n\tmethod PUT: {}\n\tmethod PATCH: {}\n\tmethod DELETE: {}".format(
+                  get_get, get_post, get_put, get_patch, get_delete))
+    print("{} status check".format(get_status))
